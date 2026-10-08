@@ -699,7 +699,30 @@ voice goes — any command that takes the audio path last and prints text:
 "transcribe_cmd": "sh -c 'ffmpeg -loglevel quiet -y -i \"$0\" -ar 16000 /tmp/nm.wav && whisper-cli -m ~/models/ggml-base.en.bin -nt -np -f /tmp/nm.wav'"
 ```
 
-(whisper.cpp, fully local.) Without one, the agent gets the audio file's path.
+(whisper.cpp, fully local.) Without one, the agent gets the audio file's path.### Faster-Whisper
+
+```sh
+python3 -c 'import sys; from faster_whisper import WhisperModel; m=WhisperModel("base", device="cpu", compute_type="int8"); s,_=m.transcribe(sys.argv[1]); print("".join(x.text for x in s))'
+```
+
+The audio file path is passed as the command's final argument.
+
+### macOS (Homebrew Whisper)
+
+```sh
+sh -c 'd=$(mktemp -d); whisper "$0" --model base --output_format txt --output_dir "$d" --verbose False >/dev/null 2>&1 && cat "$d/$(basename "${0%.*}").txt"'
+```
+
+The audio file is read from the final argument and Whisper writes its temporary transcript inside a temporary directory.
+
+### OpenAI-compatible API
+
+```sh
+sh -c 'curl -sS "$TRANSCRIBE_URL/v1/audio/transcriptions" -H "Authorization: Bearer $TRANSCRIBE_API_KEY" -F "file=@$0" -F "model=whisper-1" -F "response_format=text"'
+```
+
+The audio file is uploaded to the API as the `file` multipart field.
+
 
 ## Without Telegram
 
