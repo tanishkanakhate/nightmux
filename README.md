@@ -700,6 +700,13 @@ voice goes — any command that takes the audio path last and prints text:
 ```
 
 (whisper.cpp, fully local.) Without one, the agent gets the audio file's path.
+### Faster-Whisper
+
+```sh
+python3 -c 'import sys; from faster_whisper import WhisperModel; m=WhisperModel("base", device="cpu", compute_type="int8"); s,_=m.transcribe(sys.argv[1]); print("".join(x.text for x in s))'
+sh -c 'd=$(mktemp -d); whisper "$0" --model base --output_format txt --output_dir "$d" --verbose False >/dev/null 2>&1 && cat "$d/$(basename "${0%.*}").txt"'
+sh -c 'curl -sS "$TRANSCRIBE_URL/v1/audio/transcriptions" -H "Authorization: Bearer $TRANSCRIBE_API_KEY" -F "file=@$0" -F "model=whisper-1" -F "response_format=text"'
+
 
 ## Without Telegram
 
